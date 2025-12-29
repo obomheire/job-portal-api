@@ -20,6 +20,11 @@ func main() {
 		log.Fatal("POSTGRES_DB environment variable is not set")
 	}
 
+	// Run migrations
+	if err := repository.RunMigrations(dsn); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
 	pool, err := repository.InitDB(dsn)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
