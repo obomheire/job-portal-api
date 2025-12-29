@@ -2,10 +2,12 @@ package models
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID             int       `json:"id"`
+	ID             uuid.UUID `json:"id"`
 	Username       string    `json:"username"`
 	Password       string    `json:"-"` // Never send password in JSON response
 	Email          string    `json:"email"`
