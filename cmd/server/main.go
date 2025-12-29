@@ -4,7 +4,10 @@ import (
 	"log"
 	"os"
 
+	"job-portal-api/internal/handlers"
 	"job-portal-api/internal/repository"
+	"job-portal-api/internal/routes"
+	"job-portal-api/internal/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -35,7 +38,12 @@ func main() {
 
 	r := gin.Default()
 
-	// TODO: Setup routes
+	// Initialize services and handlers
+	appService := services.NewAppService(pool)
+	appHandler := handlers.NewAppHandler(appService)
+
+	// Setup routes
+	routes.RegisterAppRoutes(r, appHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
