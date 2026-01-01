@@ -22,18 +22,18 @@ func NewAuthService(userRepo *repository.UserRepository) *AuthService {
 	return &AuthService{userRepo: userRepo}
 }
 
-func (s *AuthService) Register(ctx context.Context, username, email, password string) error {
+func (s *AuthService) Register(ctx context.Context, username, email, password string) (*models.User, error) {
 	if username == "" || email == "" || password == "" {
-		return errors.New("all fields are required")
+		return nil, errors.New("all fields are required")
 	}
 
 	if _, err := mail.ParseAddress(email); err != nil {
-		return errors.New("invalid email format")
+		return nil, errors.New("invalid email format")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	user := &models.User{
@@ -42,22 +42,26 @@ func (s *AuthService) Register(ctx context.Context, username, email, password st
 		Password: string(hashedPassword),
 	}
 
-	return s.userRepo.CreateUser(ctx, user)
+	if err := s.userRepo.CreateUser(ctx, user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
-func (s *AuthService) Login(ctx context.Context, email, password string) (string, error) {
+func (s *AuthService) Login(ctx context.Context, email, password string) (string, *models.User, error) {
 	user, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
-		return "", errors.New("invalid credentials")
+		return "", nil, errors.New("invalid credentials")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return "", errors.New("invalid credentials")
+		return "", nil, errors.New("invalid credentials")
 	}
 
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		return "", errors.New("jwt secret not configured")
+		return "", nil, errors.New("jwt secret not configured")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -65,5 +69,10 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (string
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	return token.SignedString([]byte(secret))
+	tokenString, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", nil, err
+	}
+
+	return tokenString, user, nil
 }
