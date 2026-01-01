@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterAppRoutes(r *gin.Engine, handler *handlers.AppHandler) {
-	api := r.Group("/api")
+func RegisterAppRoutes(r *gin.RouterGroup, handler *handlers.AppHandler) {
+	api := r.Group("/app")
 	{
 		api.GET("/health", handler.HealthCheck)
 	}
