@@ -42,8 +42,13 @@ func main() {
 	appService := services.NewAppService(pool)
 	appHandler := handlers.NewAppHandler(appService)
 
+	userRepo := repository.NewUserRepository(pool)
+	authService := services.NewAuthService(userRepo)
+	authHandler := handlers.NewAuthHandler(authService)
+
 	// Setup routes
 	routes.RegisterAppRoutes(r, appHandler)
+	routes.RegisterAuthRoutes(r, authHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
