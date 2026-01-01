@@ -1,2 +1,10 @@
 .env
 commands
+
+# Air - Live reload for Go apps
+tmp/
+build-errors.log
+
+# Binary files
+main
+server
