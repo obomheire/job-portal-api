@@ -22,10 +22,10 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *models.User) erro
 	query := `
 		INSERT INTO users (username, email, password) 
 		VALUES ($1, $2, $3) 
-		RETURNING id, created_at, updated_at, is_admin
+		RETURNING id, created_at, updated_at, is_admin, profile_picture
 	`
 	err := r.pool.QueryRow(ctx, query, user.Username, user.Email, user.Password).
-		Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.IsAdmin)
+		Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.IsAdmin, &user.ProfilePicture)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w", err)
 	}
@@ -33,9 +33,9 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *models.User) erro
 }
 
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	query := `SELECT id, username, email, password, is_admin FROM users WHERE email = $1`
+	query := `SELECT id, username, email, password, is_admin, profile_picture FROM users WHERE email = $1`
 	var user models.User
-	err := r.pool.QueryRow(ctx, query, email).Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.IsAdmin)
+	err := r.pool.QueryRow(ctx, query, email).Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.IsAdmin, &user.ProfilePicture)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errors.New("user not found")
