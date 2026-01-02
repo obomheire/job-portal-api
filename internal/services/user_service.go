@@ -19,3 +19,7 @@ func NewUserService(userRepo *repository.UserRepository) *UserService {
 func (s *UserService) GetUserById(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	return s.userRepo.GetUserById(ctx, id)
 }
+
+func (s *UserService) UpdateUser(ctx context.Context, user *models.User) error {
+	return s.userRepo.UpdateUser(ctx, user)
+}

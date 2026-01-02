@@ -1,3 +1,6 @@
-Lets do some code refatoring. I have a added a file pkg/utils/jwt.go, I want it to contain the logic for generatinng and validating the jwt token for users. Add GenerateAccessToken and ValidateAccessToken methods tha will be called by any other methods to issue and valiadate jwt token for autentication. Refactor the @Login method to use the GenerateAccessToken to get access token for users. Also, the middleware should use the ValidateAccessToken method to validate users token. 
-
-Lastly, I want to include 3 variable from the user object in the generated jwt token so that I can get access to these variable when a user is athenticated. Add username, userID and isAdmin  from the user object to the token so I can get access to them later.
+Now, let's add a UpdateUserProfile method to update user's profile. 
+NB:
+1. The method will accept a user ID param
+2. Only a user with isAdmin true can update any user's profile, a user that have isAdmin set to false can only update their own profile
+3. Admin can update any properties of the user object  except password (username, email, isAdmin, profilePicture) but a user that is not an admin can only update 3 fields (username, email, profilePicture) from thier profile
+4. The UpdateUserProfile should be athenticated

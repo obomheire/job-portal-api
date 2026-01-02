@@ -12,5 +12,6 @@ func RegisterUserRoutes(r *gin.RouterGroup, handler *handlers.UserHandler) {
 	user.Use(middleware.AuthMiddleware())
 	{
 		user.GET("/:id", handler.GetUserById)
+		user.PUT("/:id", handler.UpdateUser)
 	}
 }

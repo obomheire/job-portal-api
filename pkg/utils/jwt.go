@@ -20,7 +20,7 @@ func GenerateAccessToken(user *models.User) (string, error) {
 		"user_id":  user.ID.String(),
 		"username": user.Username,
 		"is_admin": user.IsAdmin,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(),
+		"exp":      time.Now().Add(time.Hour * 1).Unix(),
 	})
 
 	return token.SignedString([]byte(secret))
