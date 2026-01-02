@@ -75,4 +75,5 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (string
 	}
 
 	return tokenString, user, nil
+
 }
