@@ -38,15 +38,17 @@ func main() {
 
 	r := gin.Default()
 
-	// Initialize services and handlers
-	appService := services.NewAppService(pool)
-	appHandler := handlers.NewAppHandler(appService)
-
+	// Initialize repositories
 	userRepo := repository.NewUserRepository(pool)
-	authService := services.NewAuthService(userRepo)
-	authHandler := handlers.NewAuthHandler(authService)
 
+	// Initialize services
+	appService := services.NewAppService(pool)
+	authService := services.NewAuthService(userRepo)
 	userService := services.NewUserService(userRepo)
+
+	// Initialize handlers
+	appHandler := handlers.NewAppHandler(appService)
+	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
 
 	// Setup routes
