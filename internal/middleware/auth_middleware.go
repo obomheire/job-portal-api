@@ -2,11 +2,11 @@ package middleware
 
 import (
 	"net/http"
-	"os"
 	"strings"
 
+	"job-portal-api/pkg/utils"
+
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -24,27 +24,9 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		tokenString := parts[1]
-		secret := os.Getenv("JWT_SECRET")
-		if secret == "" {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-			return
-		}
-
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, jwt.ErrSignatureInvalid
-			}
-			return []byte(secret), nil
-		})
-
-		if err != nil || !token.Valid {
+		claims, err := utils.ValidateAccessToken(tokenString)
+		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			return
-		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			return
 		}
 
@@ -55,6 +37,15 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("user_id", userIdStr)
+
+		if username, ok := claims["username"].(string); ok {
+			c.Set("username", username)
+		}
+
+		if isAdmin, ok := claims["is_admin"].(bool); ok {
+			c.Set("is_admin", isAdmin)
+		}
+
 		c.Next()
 	}
 }

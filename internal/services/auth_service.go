@@ -4,13 +4,11 @@ import (
 	"context"
 	"errors"
 	"net/mail"
-	"os"
-	"time"
 
 	"job-portal-api/internal/models"
 	"job-portal-api/internal/repository"
+	"job-portal-api/pkg/utils"
 
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -59,17 +57,7 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (string
 		return "", nil, errors.New("invalid credentials")
 	}
 
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		return "", nil, errors.New("jwt secret not configured")
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte(secret))
+	tokenString, err := utils.GenerateAccessToken(user)
 	if err != nil {
 		return "", nil, err
 	}

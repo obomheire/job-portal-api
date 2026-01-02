@@ -1,5 +1,4 @@
 .env
-commands
 
 # Air - Live reload for Go apps
 tmp/
