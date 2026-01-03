@@ -1,1 +1,0 @@
-When the delete user route is called (user.DELETE("/:id", handler.DeleteUser)), user's profile picture is deleted from cloudinary and the user's created jobs are cascaded on delete as the user is deleted. Before the jobs are deleted, we want the company logo of the jobs to be deleted from cloudinary using the public_id
