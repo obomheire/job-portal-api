@@ -98,8 +98,12 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		user.ProfilePicture = *req.ProfilePicture
 	}
 
-	if isAdminBool {
-		if req.IsAdmin != nil {
+	if req.IsAdmin != nil {
+		if !isAdminBool && *req.IsAdmin {
+			c.JSON(http.StatusForbidden, gin.H{"error": "You dont have permission to perform this update"})
+			return
+		}
+		if isAdminBool {
 			user.IsAdmin = *req.IsAdmin
 		}
 	}
