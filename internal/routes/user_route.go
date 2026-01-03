@@ -13,5 +13,6 @@ func RegisterUserRoutes(r *gin.RouterGroup, handler *handlers.UserHandler) {
 	{
 		user.GET("/:id", handler.GetUserById)
 		user.PUT("/:id", handler.UpdateUser)
+		user.POST("/:id/upload-picture", handler.UploadProfilePicture)
 	}
 }

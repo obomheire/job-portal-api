@@ -116,3 +116,47 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
+
+func (h *UserHandler) UploadProfilePicture(c *gin.Context) {
+	userIdStr := c.Param("id")
+	targetUserID, err := uuid.Parse(userIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	authUserIDStr, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	authUserID, err := uuid.Parse(authUserIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid auth user ID"})
+		return
+	}
+
+	isAdmin, _ := c.Get("is_admin")
+	isAdminBool, _ := isAdmin.(bool)
+
+	if !isAdminBool && authUserID != targetUserID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You can only update your own profile picture"})
+		return
+	}
+
+	file, _, err := c.Request.FormFile("profile_picture")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get file from request"})
+		return
+	}
+	defer file.Close()
+
+	url, err := h.userService.UploadProfilePicture(c.Request.Context(), targetUserID, file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload image: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"profile_picture": url})
+}

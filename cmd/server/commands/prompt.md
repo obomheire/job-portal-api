@@ -1,6 +1,2 @@
-Now, let's add a UpdateUserProfile method to update user's profile. 
-NB:
-1. The method will accept a user ID param
-2. Only a user with isAdmin true can update any user's profile, a user that have isAdmin set to false can only update their own profile
-3. Admin can update any properties of the user object  except password (username, email, isAdmin, profilePicture) but a user that is not an admin can only update 3 fields (username, email, profilePicture) from thier profile
-4. The UpdateUserProfile should be athenticated
+I have added a cloudinary connection string containing api key, api secret and cloud name to my .env file (CLOUDINARY_URL), create a method for  users to upload profile picture to cloudinary and update the user profile picture in the database. A user is allowed to update their profile picture an not another user's profile picture however an admin is allowed to update any user's profile picture. Route should be protected by authentication middleware.
+User the cloudinary sdk go get github.com/cloudinary/cloudinary-go/v2 to implement the method. I have a folder in the cloudinary named job-portal and that is where I want the image to be uploaded to.

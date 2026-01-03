@@ -8,6 +8,7 @@ import (
 	"job-portal-api/internal/repository"
 	"job-portal-api/internal/routes"
 	"job-portal-api/internal/services"
+	"job-portal-api/pkg/cloudinary"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -38,13 +39,19 @@ func main() {
 
 	r := gin.Default()
 
+	// Initialize Cloudinary
+	cldService, err := cloudinary.NewService()
+	if err != nil {
+		log.Fatalf("Failed to initialize Cloudinary service: %v", err)
+	}
+
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(pool)
 
 	// Initialize services
 	appService := services.NewAppService(pool)
 	authService := services.NewAuthService(userRepo)
-	userService := services.NewUserService(userRepo)
+	userService := services.NewUserService(userRepo, cldService)
 
 	// Initialize handlers
 	appHandler := handlers.NewAppHandler(appService)
