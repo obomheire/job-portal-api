@@ -61,8 +61,7 @@ func (s *JobService) UpdateJob(ctx context.Context, jobID uuid.UUID, updateData 
 	if !requestUser.IsAdmin && existingJob.UserID != requestUser.ID {
 		return nil, errors.New("unauthorized to update this job")
 	}
-
-	// Update fields
+	
 	// Update fields only if they are provided
 	if updateData.Title != "" {
 		existingJob.Title = updateData.Title
