@@ -100,7 +100,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 
 	if req.IsAdmin != nil {
 		if !isAdminBool && *req.IsAdmin {
-			c.JSON(http.StatusForbidden, gin.H{"error": "You dont have permission to perform this update"})
+			c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to perform this update"})
 			return
 		}
 		if isAdminBool {
