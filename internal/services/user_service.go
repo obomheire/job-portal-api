@@ -12,11 +12,12 @@ import (
 
 type UserService struct {
 	userRepo *repository.UserRepository
+	jobRepo  *repository.JobRepository
 	cld      *cloudinary.Service
 }
 
-func NewUserService(userRepo *repository.UserRepository, cld *cloudinary.Service) *UserService {
-	return &UserService{userRepo: userRepo, cld: cld}
+func NewUserService(userRepo *repository.UserRepository, jobRepo *repository.JobRepository, cld *cloudinary.Service) *UserService {
+	return &UserService{userRepo: userRepo, jobRepo: jobRepo, cld: cld}
 }
 
 func (s *UserService) GetUserById(ctx context.Context, id uuid.UUID) (*models.User, error) {
@@ -63,11 +64,28 @@ func (s *UserService) DeleteUser(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 
+	// Delete profile picture if exists
 	if user.ProfilePicture.PublicID != "" {
 		if err := s.cld.DeleteAsset(ctx, user.ProfilePicture.PublicID); err != nil {
-			// Log error but proceed? Or fail? Prompt implies dependencies.
-			// Let's return error to be safe.
 			return err
+		}
+	}
+
+	// Get all jobs created by the user
+	jobs, err := s.jobRepo.GetJobsByUserID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Delete company logos for each job
+	for _, job := range jobs {
+		if job.CompanyLogo.PublicID != "" {
+			if err := s.cld.DeleteAsset(ctx, job.CompanyLogo.PublicID); err != nil {
+				// We log or simply return error. Returning error seems safer to ensure consistency,
+				// though it might block deletion if one image fails.
+				// Given the previous pattern, let's return error.
+				return err
+			}
 		}
 	}
 

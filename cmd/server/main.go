@@ -52,7 +52,7 @@ func main() {
 	// Initialize services
 	appService := services.NewAppService(pool)
 	authService := services.NewAuthService(userRepo)
-	userService := services.NewUserService(userRepo, cldService)
+	userService := services.NewUserService(userRepo, jobRepo, cldService)
 	jobService := services.NewJobService(jobRepo, cldService)
 
 	// Initialize handlers
