@@ -26,11 +26,11 @@ func NewJobService(repo *repository.JobRepository, cldService *cloudinary.Servic
 
 func (s *JobService) CreateJob(ctx context.Context, job *models.Job, file multipart.File, filename string) (*models.Job, error) {
 	if file != nil {
-		imageUrl, err := s.cldService.UploadImage(ctx, file, filename)
+		imageUrl, publicID, err := s.cldService.UploadImage(ctx, file, filename)
 		if err != nil {
 			return nil, err
 		}
-		job.CompanyLogo = imageUrl
+		job.CompanyLogo = models.FileUpload{URL: imageUrl, PublicID: publicID}
 	}
 
 	if err := s.repo.CreateJob(ctx, job); err != nil {
@@ -61,7 +61,7 @@ func (s *JobService) UpdateJob(ctx context.Context, jobID uuid.UUID, updateData 
 	if !requestUser.IsAdmin && existingJob.UserID != requestUser.ID {
 		return nil, errors.New("unauthorized to update this job")
 	}
-	
+
 	// Update fields only if they are provided
 	if updateData.Title != "" {
 		existingJob.Title = updateData.Title
@@ -89,11 +89,16 @@ func (s *JobService) UpdateJob(ctx context.Context, jobID uuid.UUID, updateData 
 	}
 
 	if file != nil {
-		imageUrl, err := s.cldService.UploadImage(ctx, file, filename)
+		// Delete old logo if it exists
+		if existingJob.CompanyLogo.PublicID != "" {
+			_ = s.cldService.DeleteImage(ctx, existingJob.CompanyLogo.PublicID)
+		}
+
+		imageUrl, publicID, err := s.cldService.UploadImage(ctx, file, filename)
 		if err != nil {
 			return nil, err
 		}
-		existingJob.CompanyLogo = imageUrl
+		existingJob.CompanyLogo = models.FileUpload{URL: imageUrl, PublicID: publicID}
 	}
 
 	if err := s.repo.UpdateJob(ctx, existingJob); err != nil {
@@ -111,6 +116,11 @@ func (s *JobService) DeleteJob(ctx context.Context, id uuid.UUID, requestUser *m
 
 	if !requestUser.IsAdmin && existingJob.UserID != requestUser.ID {
 		return errors.New("unauthorized to delete this job")
+	}
+
+	// Delete logo from Cloudinary if it exists
+	if existingJob.CompanyLogo.PublicID != "" {
+		_ = s.cldService.DeleteImage(ctx, existingJob.CompanyLogo.PublicID)
 	}
 
 	return s.repo.DeleteJob(ctx, id)

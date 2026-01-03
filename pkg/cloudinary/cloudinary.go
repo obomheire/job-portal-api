@@ -26,12 +26,20 @@ func NewService() (*Service, error) {
 	return &Service{cld: cld}, nil
 }
 
-func (s *Service) UploadImage(ctx context.Context, file multipart.File, filename string) (string, error) {
+func (s *Service) UploadImage(ctx context.Context, file multipart.File, filename string) (string, string, error) {
 	resp, err := s.cld.Upload.Upload(ctx, file, uploader.UploadParams{
-		Folder: "job-portal",
+		Folder:   "job-portal",
+		PublicID: filename,
 	})
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return resp.SecureURL, nil
+	return resp.SecureURL, resp.PublicID, nil
+}
+
+func (s *Service) DeleteImage(ctx context.Context, publicID string) error {
+	_, err := s.cld.Upload.Destroy(ctx, uploader.DestroyParams{
+		PublicID: publicID,
+	})
+	return err
 }

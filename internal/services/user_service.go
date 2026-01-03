@@ -35,13 +35,16 @@ func (s *UserService) UploadProfilePicture(ctx context.Context, userID uuid.UUID
 	}
 
 	// Upload to Cloudinary using userID as filename to overwrite existing
-	imageURL, err := s.cld.UploadImage(ctx, file, userID.String())
+	imageURL, publicID, err := s.cld.UploadImage(ctx, file, userID.String())
 	if err != nil {
 		return "", err
 	}
 
 	// Update user record
-	user.ProfilePicture = imageURL
+	user.ProfilePicture = models.FileUpload{
+		URL:      imageURL,
+		PublicID: publicID,
+	}
 	err = s.userRepo.UpdateUser(ctx, user)
 	if err != nil {
 		return "", err
