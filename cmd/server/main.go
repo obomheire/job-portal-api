@@ -47,22 +47,26 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(pool)
+	jobRepo := repository.NewJobRepository(pool)
 
 	// Initialize services
 	appService := services.NewAppService(pool)
 	authService := services.NewAuthService(userRepo)
 	userService := services.NewUserService(userRepo, cldService)
+	jobService := services.NewJobService(jobRepo, cldService)
 
 	// Initialize handlers
 	appHandler := handlers.NewAppHandler(appService)
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
+	jobHandler := handlers.NewJobHandler(jobService)
 
 	// Setup routes
 	api := r.Group("/api")
 	routes.RegisterAppRoutes(api, appHandler)
 	routes.RegisterAuthRoutes(api, authHandler)
 	routes.RegisterUserRoutes(api, userHandler)
+	routes.RegisterJobRoutes(api, jobHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
