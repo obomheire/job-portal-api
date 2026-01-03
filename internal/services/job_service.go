@@ -63,14 +63,31 @@ func (s *JobService) UpdateJob(ctx context.Context, jobID uuid.UUID, updateData 
 	}
 
 	// Update fields
-	existingJob.Title = updateData.Title
-	existingJob.Description = updateData.Description
-	existingJob.Location = updateData.Location
-	existingJob.Salary = updateData.Salary
-	existingJob.ExperienceLevel = updateData.ExperienceLevel
-	existingJob.Skills = updateData.Skills
-	existingJob.JobType = updateData.JobType
-	existingJob.Company = updateData.Company
+	// Update fields only if they are provided
+	if updateData.Title != "" {
+		existingJob.Title = updateData.Title
+	}
+	if updateData.Description != "" {
+		existingJob.Description = updateData.Description
+	}
+	if updateData.Location != "" {
+		existingJob.Location = updateData.Location
+	}
+	if updateData.Salary != "" {
+		existingJob.Salary = updateData.Salary
+	}
+	if updateData.ExperienceLevel != "" {
+		existingJob.ExperienceLevel = updateData.ExperienceLevel
+	}
+	if len(updateData.Skills) > 0 {
+		existingJob.Skills = append(existingJob.Skills, updateData.Skills...)
+	}
+	if updateData.JobType != "" {
+		existingJob.JobType = updateData.JobType
+	}
+	if updateData.Company != "" {
+		existingJob.Company = updateData.Company
+	}
 
 	if file != nil {
 		imageUrl, err := s.cldService.UploadImage(ctx, file, filename)
