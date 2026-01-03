@@ -12,7 +12,9 @@ func RegisterUserRoutes(r *gin.RouterGroup, handler *handlers.UserHandler) {
 	user.Use(middleware.AuthMiddleware())
 	{
 		user.GET("/:id", handler.GetUserById)
+		user.GET("/", handler.GetAllUsers)
 		user.PUT("/:id", handler.UpdateUser)
+		user.DELETE("/:id", handler.DeleteUser)
 		user.POST("/:id/upload-picture", handler.UploadProfilePicture)
 	}
 }

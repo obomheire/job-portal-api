@@ -43,3 +43,7 @@ func (s *Service) DeleteImage(ctx context.Context, publicID string) error {
 	})
 	return err
 }
+
+func (s *Service) DeleteAsset(ctx context.Context, publicID string) error {
+	return s.DeleteImage(ctx, publicID)
+}

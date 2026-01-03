@@ -165,3 +165,50 @@ func (h *UserHandler) UploadProfilePicture(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"profile_picture": url})
 }
+
+func (h *UserHandler) GetAllUsers(c *gin.Context) {
+	isAdmin, _ := c.Get("is_admin")
+	if isAdminBool, ok := isAdmin.(bool); !ok || !isAdminBool {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can access this resource"})
+		return
+	}
+
+	users, err := h.userService.GetAllUsers(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
+		return
+	}
+	c.JSON(http.StatusOK, users)
+}
+
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User ID"})
+		return
+	}
+
+	authUserIDStr, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	authUserID, _ := uuid.Parse(authUserIDStr.(string))
+	isAdmin, _ := c.Get("is_admin")
+	isAdminBool, _ := isAdmin.(bool)
+
+	if !isAdminBool {
+		if authUserID != id {
+			c.JSON(http.StatusForbidden, gin.H{"error": "You can only delete your own account"})
+			return
+		}
+	}
+
+	if err := h.userService.DeleteUser(c.Request.Context(), id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}

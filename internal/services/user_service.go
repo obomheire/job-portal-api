@@ -52,3 +52,24 @@ func (s *UserService) UploadProfilePicture(ctx context.Context, userID uuid.UUID
 
 	return imageURL, nil
 }
+
+func (s *UserService) GetAllUsers(ctx context.Context) ([]models.User, error) {
+	return s.userRepo.GetAllUsers(ctx)
+}
+
+func (s *UserService) DeleteUser(ctx context.Context, id uuid.UUID) error {
+	user, err := s.userRepo.GetUserById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if user.ProfilePicture.PublicID != "" {
+		if err := s.cld.DeleteAsset(ctx, user.ProfilePicture.PublicID); err != nil {
+			// Log error but proceed? Or fail? Prompt implies dependencies.
+			// Let's return error to be safe.
+			return err
+		}
+	}
+
+	return s.userRepo.DeleteUser(ctx, id)
+}
