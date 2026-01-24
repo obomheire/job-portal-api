@@ -3,3 +3,4 @@
 # Air - Live reload for Go apps
 tmp/
 build-errors.log
+.DS_Store
